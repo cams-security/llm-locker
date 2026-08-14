@@ -4,7 +4,13 @@ import secrets
 from fastapi import HTTPException, Security, status
 from fastapi.security import APIKeyHeader
 
-API_KEY = os.environ.get("LOCKER_API_KEY", "dev-secret-key-change-me")
+API_KEY = os.environ.get("LOCKER_API_KEY")
+if not API_KEY:
+    raise RuntimeError(
+        "LOCKER_API_KEY is not set. Generate one with:\n"
+        '  python -c "import secrets; print(secrets.token_urlsafe(32))"\n'
+        "and set it before starting the server."
+    )
 
 _api_key_header = APIKeyHeader(name="X-API-Key")
 
