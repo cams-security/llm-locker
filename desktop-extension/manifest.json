@@ -1,0 +1,54 @@
+{
+  "manifest_version": "0.4",
+  "name": "llm-locker",
+  "display_name": "Locker",
+  "version": "1.0.0",
+  "description": "Write and read encrypted LLM memories/tools/notes via the locker API",
+  "author": {
+    "name": "Cam"
+  },
+  "server": {
+    "type": "uv",
+    "entry_point": "src/mcp_server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run", "--directory", "${__dirname}", "src/mcp_server.py"],
+      "env": {
+        "LOCKER_API_KEY": "${user_config.locker_api_key}",
+        "LOCKER_ENCRYPTION_KEY": "${user_config.locker_encryption_key}",
+        "LOCKER_API_URL": "${user_config.locker_api_url}"
+      }
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "linux", "win32"],
+    "runtimes": {
+      "python": ">=3.10"
+    }
+  },
+  "user_config": {
+    "locker_api_key": {
+      "type": "string",
+      "title": "Locker API Key",
+      "description": "Must match LOCKER_API_KEY in your locker/.env file",
+      "sensitive": true,
+      "required": true
+    },
+    "locker_encryption_key": {
+      "type": "string",
+      "title": "Locker Encryption Key",
+      "description": "Must match LOCKER_ENCRYPTION_KEY in your locker/.env file (base64, 32 bytes)",
+      "sensitive": true,
+      "required": true
+    },
+    "locker_api_url": {
+      "type": "string",
+      "title": "Locker API URL",
+      "description": "URL of the running locker API server",
+      "default": "http://127.0.0.1:8000",
+      "required": false
+    }
+  },
+  "keywords": ["memory", "llm", "encryption"],
+  "license": "MIT"
+}

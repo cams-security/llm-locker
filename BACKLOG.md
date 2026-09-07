@@ -175,6 +175,21 @@ decisions later, not surprises:
 The whole point of hosting this ourselves is that a user should never need
 to touch Azure, a CLI, or a config file.
 
+- [x] **Local/personal-use setup, done.** `setup.py` generates `.env` with
+      both keys on first run (idempotent), `start.sh` is a one-command
+      start, and `api.py`/`mcp_server.py` load `.env` automatically. Claude
+      Code (`.mcp.json`) and VS Code Copilot Chat (`.vscode/mcp.json`)
+      both share that `.env` with zero manual exports. Claude Desktop
+      turned out to be a real exception, not just more config: current
+      versions don't read `mcpServers` from `claude_desktop_config.json`
+      for local servers at all anymore (confirmed via
+      `LocalMcpServerManager` in its own logs) — they require a packaged
+      `.mcpb` extension instead, built via `desktop-extension/build.sh`,
+      with the two keys pasted into its install prompt by hand since the
+      sandboxed extension can't see `.env`. All of this is single-machine,
+      single-user convenience only — it does nothing for the actual
+      hosted-onboarding items below, which require a server other people
+      can sign up to.
 - [ ] **Sign-up flow** — get a working key in under a minute, no manual
       provisioning on our end per user.
 - [ ] **Self-service key dashboard** — create, view, and revoke keys;
@@ -188,6 +203,50 @@ to touch Azure, a CLI, or a config file.
 - [ ] **Per-tenant rate limits/quotas**, not just global rate limiting —
       one noisy tenant shouldn't be able to degrade service for everyone
       else sharing the deployment.
+
+## Agent collaboration / shared channels (proposed, not scoped)
+
+Idea: a shared room/channel multiple agents can post to and read from, for
+coordination — not just one-owner private memory. Worth designing as a
+generalization of a pattern that's already showing up twice:
+
+- **Durable private memory** (built) — one owner, persists until deleted.
+- **One-time handoff** (proposed earlier, not built) — one-to-one,
+  consumed and gone after first read.
+- **Shared room** (this) — many-to-many, persistent, not consumed.
+
+These are the same underlying primitive (an encrypted record with a
+lifecycle and a visibility scope) with different settings, not three
+unrelated features — worth keeping that in mind so this doesn't turn into
+three separate subsystems that drift apart.
+
+- [ ] **Security: this is a prompt-injection vector between your own
+      agents, and needs to be treated as one.** If Agent A can post
+      arbitrary content to a room Agent B later reads and acts on, that's
+      the same risk class as an agent reading untrusted web content —
+      except it's easy to overlook here because it's "your own system."
+      Access control alone doesn't solve this; content from a shared room
+      needs to be treated as untrusted input by whatever agent consumes
+      it, the same way you'd treat scraped web content, not as trusted
+      system state.
+- [ ] **Poll, not push.** Chat rooms conventionally imply live delivery,
+      but most agents aren't long-running listeners — they run, do a
+      task, exit. A `since` parameter (messages after a given id/timestamp)
+      fits how agents actually operate much better than websockets/push,
+      at least as a starting point.
+- [ ] **Open question: reuse the existing schema or a new primitive?**
+      Could stretch `type`/`tags` to mean `type: "chat"`,
+      `tags: "room:project-x"` — cheap, but a stretch. A proper
+      `room`/`channel` concept is more correct but is new modeling work.
+      Decide once there's a concrete use case driving it, not speculatively.
+- [ ] **Key distribution gets harder, not just bigger.** The single-key
+      model in the E2EE section assumes one owner. A room read by multiple
+      distinct agents needs those agents to share a room-scoped key (or
+      accept per-room keys), which is the "multi-party key agreement"
+      complexity already flagged as disproportionate for the one-owner
+      case — a shared room is exactly the scenario where it stops being
+      avoidable, so this may force the key-distribution design sooner than
+      the rest of the roadmap would otherwise require.
 
 ## Hosting / ops
 

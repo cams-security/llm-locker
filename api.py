@@ -1,6 +1,10 @@
 from contextlib import asynccontextmanager
 from typing import List, Optional
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlmodel import Session, select
 
