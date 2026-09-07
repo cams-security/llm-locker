@@ -45,9 +45,13 @@ def list_memories(
     statement = select(Memory).order_by(Memory.created_at.desc())
     if type:
         statement = statement.where(Memory.type == type)
+    results = session.exec(statement).all()
     if tag:
-        statement = statement.where(Memory.tags.contains(tag))
-    return session.exec(statement).all()
+        # Exact membership check in Python: SQLite has no reliable JSON-array
+        # containment operator (unlike Postgres's `@>`), and this is cheap at
+        # personal-use scale. Revisit once on Postgres (see BACKLOG.md).
+        results = [memory for memory in results if tag in memory.tags]
+    return results
 
 
 @app.get("/memories/{memory_id}", response_model=MemoryRead, dependencies=[Depends(require_api_key)])

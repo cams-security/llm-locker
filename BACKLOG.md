@@ -146,10 +146,13 @@ decisions later, not surprises:
       Flexible Server is the natural target — `LOCKER_DB_URL` already makes
       this a config change, not a rewrite. Also a prerequisite for the
       at-rest encryption item above.
-- [ ] **Fix tag matching.** `list_memories` currently does a SQL `LIKE`
-      substring match on a comma-separated `tags` string (`api.py`), so a
-      filter for tag `cat` also matches `concatenate`. Needs a real tags
-      table (or a JSON column with exact-match filtering).
+- [x] **Fix tag matching.** `tags` is now a real JSON list column
+      (`models.py`), filtered by exact Python-side membership rather than
+      SQL `LIKE` — `tag=cat` no longer matches `concatenate`. Covered by
+      `test_tag_filter_is_exact_not_substring`. Filtering happens in
+      application code rather than SQL because SQLite has no reliable JSON
+      containment operator (unlike Postgres's `@>`); revisit once on
+      Postgres if the personal-use row counts stop making that fine.
 - [ ] **Add pagination** to `GET /memories` — it currently returns every row
       unbounded, which won't scale past a small number of memories.
 - [ ] **Add update/delete endpoints.** Right now memories can only be
@@ -186,7 +189,9 @@ to touch Azure, a CLI, or a config file.
       `LocalMcpServerManager` in its own logs) — they require a packaged
       `.mcpb` extension instead, built via `desktop-extension/build.sh`,
       with the two keys pasted into its install prompt by hand since the
-      sandboxed extension can't see `.env`. All of this is single-machine,
+      sandboxed extension can't see `.env`. All three (Claude Code, VS
+      Code Copilot Chat, Claude Desktop) confirmed working live, not just
+      programmatically. All of this is single-machine,
       single-user convenience only — it does nothing for the actual
       hosted-onboarding items below, which require a server other people
       can sign up to.

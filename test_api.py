@@ -32,11 +32,12 @@ def test_rejects_wrong_api_key():
 def test_write_and_read_memory():
     created = client.post(
         "/memories",
-        json={"type": "memory", "content": "test content", "tags": "test"},
+        json={"type": "memory", "content": "test content", "tags": ["test"]},
         headers=HEADERS,
     )
     assert created.status_code == 200
     memory_id = created.json()["id"]
+    assert created.json()["tags"] == ["test"]
 
     listed = client.get("/memories", headers=HEADERS)
     assert listed.status_code == 200
@@ -45,3 +46,22 @@ def test_write_and_read_memory():
     fetched = client.get(f"/memories/{memory_id}", headers=HEADERS)
     assert fetched.status_code == 200
     assert fetched.json()["content"] == "test content"
+
+
+def test_tag_filter_is_exact_not_substring():
+    client.post(
+        "/memories",
+        json={"type": "memory", "content": "about cats", "tags": ["cat"]},
+        headers=HEADERS,
+    )
+    client.post(
+        "/memories",
+        json={"type": "memory", "content": "about strings", "tags": ["concatenate"]},
+        headers=HEADERS,
+    )
+
+    listed = client.get("/memories", params={"tag": "cat"}, headers=HEADERS)
+    assert listed.status_code == 200
+    contents = [m["content"] for m in listed.json()]
+    assert "about cats" in contents
+    assert "about strings" not in contents

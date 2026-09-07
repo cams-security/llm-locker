@@ -13,10 +13,10 @@ if not API_KEY:
 _HEADERS = {"X-API-Key": API_KEY}
 
 
-def save_memory(content: str, type: str = "memory", tags: Optional[str] = None) -> dict:
+def save_memory(content: str, type: str = "memory", tags: Optional[List[str]] = None) -> dict:
     response = httpx.post(
         f"{BASE_URL}/memories",
-        json={"content": crypto.encrypt(content), "type": type, "tags": tags},
+        json={"content": crypto.encrypt(content), "type": type, "tags": tags or []},
         headers=_HEADERS,
     )
     response.raise_for_status()

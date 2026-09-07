@@ -1,13 +1,16 @@
 from datetime import datetime, timezone
-from typing import Optional
+from typing import List, Optional
 
+from sqlalchemy import JSON, Column
 from sqlmodel import Field, SQLModel
 
 
 class MemoryBase(SQLModel):
-    type: str = Field(index=True, description="e.g. 'memory', 'tool', 'note'")
+    type: str = Field(
+        index=True, description="One of: 'memory' (facts to recall), 'tool' (reference info about an external tool/API), 'note' (anything else)"
+    )
     content: str
-    tags: Optional[str] = Field(default=None, description="comma-separated tags")
+    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON), description="list of keywords, e.g. ['preferences', 'denver']")
 
 
 class Memory(MemoryBase, table=True):
