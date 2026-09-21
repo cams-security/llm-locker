@@ -226,3 +226,11 @@ desktop-extension/*.mcpb
 
 # macOS
 .DS_Store
+
+# mcp-server-node build output
+mcp-server-node/node_modules/
+mcp-server-node/dist/
+
+# infra/main.json is `az bicep build`'s compiled ARM output — main.bicep is
+# the source of truth
+infra/main.json

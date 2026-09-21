@@ -1,0 +1,20 @@
+{
+  "name": "llm-locker-mcp",
+  "version": "1.0.0",
+  "description": "Node/TypeScript MCP server for the llm-locker memory API",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.0.0",
+    "dotenv": "^16.4.5",
+    "zod": "^4.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.10.0"
+  }
+}

@@ -195,6 +195,16 @@ to touch Azure, a CLI, or a config file.
       single-user convenience only — it does nothing for the actual
       hosted-onboarding items below, which require a server other people
       can sign up to.
+- [x] **Repo reorganized: all Python (`api.py`, `client.py`, `mcp_server.py`,
+      etc.) now lives in `server/`**, alongside a new `mcp-server-node/` —
+      a wire-compatible Node/TypeScript reimplementation of the MCP client
+      (verified interoperable: either client can decrypt what the other
+      wrote), intended as the primary distributed client going forward
+      (Homebrew, etc.) while `server/` becomes purely the hosted API.
+      `.env` stays at the repo root, read via an explicit resolved path by
+      everything that needs it, not cwd-based discovery — this is what
+      makes it keep working regardless of which subfolder something runs
+      from.
 - [ ] **Sign-up flow** — get a working key in under a minute, no manual
       provisioning on our end per user.
 - [ ] **Self-service key dashboard** — create, view, and revoke keys;
@@ -259,28 +269,38 @@ Target topology (~$30–50/mo, within the $150/mo Azure credit). Supersedes
 the free-tier `az webapp up` prototype from earlier — F1 doesn't support
 the VNet integration this plan depends on.
 
+**Updated since E2EE landed**: `crypto.py` encrypts memory content
+client-side, so the server and database only ever handle ciphertext,
+regardless of where the server runs. `LOCKER_ENCRYPTION_KEY` — the actual
+secret — lives wherever `mcp_server.py` runs (your local machine), not on
+Azure at all. That removes the need for a customer-managed key on
+Postgres (it'd only be protecting already-opaque data) and shrinks Key
+Vault's job to just `LOCKER_API_KEY` and TLS certs.
+
 - [ ] **Resource Group** — `rg-llm-locker`, everything scoped together.
 - [ ] **App Service (Linux, Python), Basic (B1) tier or higher** — hosts the
       FastAPI app. Needs to be at least B1 since F1 can't do VNet
       integration.
 - [ ] **Azure Database for PostgreSQL Flexible Server** (Burstable `B1ms`
-      to start) — replaces SQLite. Encryption at rest enabled with a
-      customer-managed key. See Security & privacy section above.
-- [ ] **Azure Key Vault** — holds API keys and the CMK used for
-      Postgres/app-level encryption.
+      to start) — replaces SQLite (whose file locking doesn't hold up on
+      App Service's SMB-backed storage). Default Azure-managed encryption
+      at rest is sufficient — see note above.
+- [ ] **Azure Key Vault** — holds `LOCKER_API_KEY` and TLS certs. Does
+      *not* hold `LOCKER_ENCRYPTION_KEY` — that never leaves the client.
 - [ ] **System-assigned Managed Identity** on the App Service — lets it
       authenticate to Key Vault and Postgres with no stored credentials;
       required for Key Vault references in App Settings to work.
 - [ ] **VNet integration + private endpoints** for Postgres and Key Vault —
-      keeps the database and secrets off the public internet, reachable
-      only from the app. This is what makes the encryption-at-rest work
-      actually meaningful, rather than encrypting data that's still
-      publicly reachable.
+      keeps the database and the API key off the public internet, reachable
+      only from the app.
 - [ ] **Application Insights** — request counts/error rates, without
       capturing memory content (ties to the log data-minimization item
       above).
 - [ ] Wire `LOCKER_API_KEY`/`LOCKER_DB_URL` as Key Vault references in App
       Settings instead of local env vars.
+- [ ] Update `LOCKER_API_URL` in every client config (`.env`,
+      `.vscode/mcp.json`, `.mcp.json`, the Claude Desktop extension's
+      `user_config`) to point at the hosted URL instead of `localhost`.
 - [ ] CI: run `pytest` on every PR (GitHub Actions).
 - [ ] CD: auto-deploy `main` to Azure on merge.
 

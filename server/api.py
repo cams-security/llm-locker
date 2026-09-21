@@ -1,9 +1,13 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import List, Optional
 
 from dotenv import load_dotenv
 
-load_dotenv()
+# .env lives at the repo root (one level above server/), shared with the
+# Node MCP client — not next to this file, so cwd-based discovery won't
+# find it once this runs from within server/.
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlmodel import Session, select

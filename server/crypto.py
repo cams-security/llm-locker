@@ -1,3 +1,8 @@
+# DEPRECATED: mcp-server-node/src/crypto.ts (repo root) is the
+# wire-compatible replacement and the one going forward. This file is kept
+# for reference and as a fallback, not under active development. See
+# server/README.md.
+
 import base64
 import os
 

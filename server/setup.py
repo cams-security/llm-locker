@@ -2,7 +2,7 @@ import base64
 import secrets
 from pathlib import Path
 
-ENV_PATH = Path(__file__).parent / ".env"
+ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
 
 
 def main() -> None:

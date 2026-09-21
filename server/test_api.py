@@ -1,6 +1,9 @@
 import os
 
 os.environ.setdefault("LOCKER_API_KEY", "dev-secret-key-change-me")
+# Force a dedicated test DB so pytest never touches the real memories.db —
+# it did once, silently overwriting real data with plaintext test fixtures.
+os.environ["LOCKER_DB_URL"] = "sqlite:///./test_memories.db"
 
 from fastapi.testclient import TestClient
 

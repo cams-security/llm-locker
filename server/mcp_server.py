@@ -1,8 +1,14 @@
+# DEPRECATED: mcp-server-node/ (repo root) is the wire-compatible
+# replacement and the one going forward. This file is kept for reference
+# and as a fallback, not under active development. See server/README.md.
+
+from pathlib import Path
 from typing import List, Optional
 
 from dotenv import load_dotenv
 
-load_dotenv()
+# See api.py for why this is an explicit path rather than a bare load_dotenv().
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from mcp.server.mcpserver import MCPServer
 
