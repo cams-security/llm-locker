@@ -1,6 +1,10 @@
+#!/usr/bin/env node
 // MCP server entry point: registers the two tools an LLM can call
 // (save_memory, list_memories) and serves them over stdio. "./env.js" must
 // be the first import — see env.ts for why the ordering matters.
+// The shebang above is what makes the compiled dist/index.js directly
+// executable once installed (Homebrew, npm's `bin` linking, etc.) rather
+// than needing `node dist/index.js` spelled out every time.
 import "./env.js";
 import { McpServer } from "@modelcontextprotocol/server";
 import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";

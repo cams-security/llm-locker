@@ -4,6 +4,9 @@
   "description": "Node/TypeScript MCP server for the llm-locker memory API",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "llm-locker-mcp": "dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js"
