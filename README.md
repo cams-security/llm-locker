@@ -16,9 +16,12 @@ LLM (or the same one, later) can read them back — gated behind an API key.
   (Homebrew, etc.); see its own directory for details.
 - **`desktop-extension/`** — packages `server/mcp_server.py` as a `.mcpb`
   bundle for Claude Desktop.
-- **`infra/`** — Bicep templates for hosting `server/` on Azure.
 - **`.env`** at the repo root — shared secrets, read by everything above
   regardless of which subfolder it runs from. Never commit it.
+
+Azure deployment infrastructure (Bicep templates) isn't in this public
+repo — kept locally instead, since it documents the exact topology of a
+live deployment.
 
 ## Requirements
 
